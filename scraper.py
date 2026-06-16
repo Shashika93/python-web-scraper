@@ -2,39 +2,37 @@ import requests
 from bs4 import BeautifulSoup
 
 print("=====================================")
-print("        LIVE BOOK WEB SCRAPER        ")
+print("     LIVE BOOKSTORE SCRAPER: ALL     ")
 print("=====================================")
 
 URL = "http://books.toscrape.com/"
 
-def scrape_book_info():
-    # 1. Send an HTTP request to the website
+def scrape_all_books():
     response = requests.get(URL)
-    
-    # FIX: Explicitly set the encoding to UTF-8 to handle currency symbols cleanly
     response.encoding = 'utf-8'
     
-    # Check if the website connected successfully
     if response.status_code != 200:
         print("Failed to retrieve the webpage.")
         return
 
-    # 2. Feed the raw HTML text into BeautifulSoup to organize it
     soup = BeautifulSoup(response.text, "html.parser")
 
-    # 3. Target the container holding the first book item
-    first_book = soup.find("article", class_="product_pod")
+    # FIX: Changing .find() to .find_all() collects EVERY book card into a list
+    all_books = soup.find_all("article", class_="product_pod")
 
-    if first_book:
-        title = first_book.h3.a["title"]
-        price = first_book.find("p", class_="price_color").text
+    print(f"Found {len(all_books)} books on the homepage!\n")
+    print("--------------------------------------------------")
+
+    # Loop through our list of 20 books one by one
+    for index, book in enumerate(all_books, start=1):
+        # Extract individual titles and prices safely inside the loop
+        title = book.h3.a["title"]
+        price = book.find("p", class_="price_color").text
         
-        # Print out our clean, extracted results!
-        print("\nSuccessfully extracted live data:")
-        print(f"📖 Book Title: {title}")
-        print(f"💰 Book Price: {price}")
-    else:
-        print("Could not find any book elements on the page.")
+        # Clean up the output text by pulling out extra characters if needed
+        print(f"{index}. 📖 {title}")
+        print(f"   💰 Price: {price}")
+        print("--------------------------------------------------")
 
 if __name__ == "__main__":
-    scrape_book_info()
+    scrape_all_books()
